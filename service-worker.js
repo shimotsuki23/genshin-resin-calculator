@@ -1,24 +1,14 @@
-const CACHE_NAME = "genshin-resin-calculator-v1";
-const FILES = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./icon.svg"
-];
-
+const CACHE_NAME = "genshin-tools-v1";
+const FILES = ["./", "./index.html", "./resin.html", "./artifact.html", "./manifest.json", "./icon.svg"];
 self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES))
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(FILES)));
   self.skipWaiting();
 });
-
 self.addEventListener("activate", event => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))));
+  self.clients.claim();
 });
-
 self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request))
-  );
+  if (event.request.method !== "GET") return;
+  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request)));
 });
